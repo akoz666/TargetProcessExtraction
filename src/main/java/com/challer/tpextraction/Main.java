@@ -7,6 +7,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,13 +25,22 @@ public class Main {
 
     public static void main(String... args) {
 
-        logger.info("TP Extraction is starting");
+        logger.info("TP EXTRACTION IS STARTING");
 
         Main main = new Main();
 
-        // Perfom process extraction of User Stories
+        logger.info("CHECKING CONFIGURATION FILE");
+        if (!main.checkConfiguration()) {
+            logger.error("CONFIGURATION FILE IS INCORRECT - EXTRACTION IS CANCELLED");
+            return;
+        }
+        logger.info("CONFIGURATION FILE IS OK");
+
+        // Execute process extraction of User Stories
         try {
+            logger.info("STARTING US EXTRACTION");
             main.processUserStoriesExtraction();
+            logger.info("US EXTRACTION IS DONE");
         } catch (ExtractionException e) {
             logger.error(e.getMessage(), e);
             return;
@@ -38,7 +49,39 @@ public class Main {
         // Generate a static html website as parsing xml information extracted from Target Process
         // main.processWebsiteGeneration();
 
-        logger.info("TP Extraction is completed successfully");
+        logger.info("TP EXTRACTION COMPLETED SUCCESSFULLY");
+    }
+
+    /**
+     * Check if all parameters in configuration file are OK.
+     *
+     * @return true if OK, else false
+     */
+    private Boolean checkConfiguration() {
+
+        Boolean check = new Boolean(true);
+        List<String> paramsToCheck = new LinkedList<String>();
+        paramsToCheck.add("tp.username");
+        paramsToCheck.add("tp.password");
+        paramsToCheck.add("tp.baseurl");
+        paramsToCheck.add("tp.nonsecurebaseurl");
+        paramsToCheck.add("tp.userstorie.url");
+        paramsToCheck.add("tp.userstorie.url.attachment");
+        paramsToCheck.add("tp.attachment.url");
+        paramsToCheck.add("tp.attachment.timeoutdownload");
+        paramsToCheck.add("tp.attachment.typemime");
+        paramsToCheck.add("tp.connection.url");
+        paramsToCheck.add("inputuserstorieslistfile");
+        paramsToCheck.add("outputpathuserstoriesaving");
+
+        for (String param : paramsToCheck) {
+            if (ConfigurationProperties.getProperty(param) == null || ConfigurationProperties.getProperty(param).trim().isEmpty()) {
+                check = new Boolean(false);
+                logger.error("CONFIGURATION FILE IS INCORRECT - " + param + " IS MISSING");
+            }
+        }
+
+        return check;
     }
 
     /**
