@@ -169,7 +169,7 @@ public class UserStorieExtractor {
         List<Element> listImages = expr.evaluate(jdomDocument);
         for (Element image : listImages) {
             String imageSrc = image.getAttributeValue("src");
-            if (imageSrc != null && !imageSrc.equals("#") && imageSrc.contains("images//")) {
+            if (imageSrc != null && !imageSrc.equals("#") && imageSrc.contains("images/")) {
 
                 // Get the image via Selenium API
                 if (imageSrc.contains("~")) {
