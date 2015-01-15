@@ -9,7 +9,7 @@
         </layout>
     </appender>
 
-    <logger name="com.cyrilhaller.tpextraction" level="debug" additivity="false">
+    <logger name="com.challer.tpextraction" level="debug" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

@@ -52,11 +52,11 @@ public class UserStorieExtractor {
         // Get the csv User Storie list
         final String inputUserStoriesListFile = ConfigurationProperties.getProperty("inputuserstorieslistfile");
 
-        InputStream userStorieInputStream = null;
+        InputStream userStorieInputStream;
         try {
             userStorieInputStream = new FileInputStream(inputUserStoriesListFile);
         } catch (FileNotFoundException e) {
-            throw new ExtractionException("Fail to open file " + inputUserStoriesListFile, e);
+            throw new ExtractionException("Failed to open file " + inputUserStoriesListFile, e);
         }
 
         InputStreamReader userStorieInputStreamReader = new InputStreamReader(userStorieInputStream);
@@ -67,13 +67,13 @@ public class UserStorieExtractor {
                 try {
                     saveUserStorie(userStorieId);
                 } catch (ExtractionException e) {
-                    logger.error("Fail to save US " + userStorieId);
+                    logger.error("Failed to save US " + userStorieId, e);
                 }
             }
 
             br.close();
         } catch (IOException e) {
-            throw new ExtractionException("Fail to read file " + inputUserStoriesListFile, e);
+            throw new ExtractionException("Failed to read file " + inputUserStoriesListFile, e);
         }
     }
 
@@ -82,8 +82,9 @@ public class UserStorieExtractor {
      *
      * @param userStorieId String - ID a the User Storie to save
      * @throws ExtractionException
+     * @throws IOException
      */
-    private void saveUserStorie(final @NotNull String userStorieId) throws ExtractionException {
+    private void saveUserStorie(final @NotNull String userStorieId) throws ExtractionException, IOException {
 
         logger.debug("US SAVING - IS STARTING - US " + userStorieId);
 
@@ -106,7 +107,7 @@ public class UserStorieExtractor {
             detectAndSaveImagesOfUserStorie(userStorieId, userStorieContent);
             detectAndSaveAttachmentOfUserStorie(userStorieId);
         } catch (IOException | JDOMException e) {
-            throw new ExtractionException("Fail to save images of the US-" + userStorieId, e);
+            throw new ExtractionException("Failed to save images of the US-" + userStorieId, e);
         }
 
         // Now it has to save the content of the User Storie
@@ -115,14 +116,10 @@ public class UserStorieExtractor {
             writer = new FileWriter(outputPathUserStorieSaving + "\\us-" + userStorieId + ".xml");
             writer.write(userStorieContent);
         } catch (IOException ex) {
-            throw new ExtractionException("Fail to write the file " + outputPathUserStorieSaving + "us-" + userStorieId + userStorieId, ex);
+            throw new ExtractionException("Failed to write the file " + outputPathUserStorieSaving + "us-" + userStorieId + userStorieId, ex);
         } finally {
             if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    throw new ExtractionException("Fail to close the file " + outputPathUserStorieSaving + "us-" + userStorieId + userStorieId, e);
-                }
+                writer.close();
             }
         }
 
@@ -191,8 +188,7 @@ public class UserStorieExtractor {
 
                 // Make a screenshot
                 File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                BufferedImage fullImg = null;
-                fullImg = ImageIO.read(screenshot);
+                BufferedImage fullImg = ImageIO.read(screenshot);
 
                 // Crop the image
                 Point point = imgElement.getLocation();
@@ -247,8 +243,8 @@ public class UserStorieExtractor {
         // Get the description part of the User Storie, which one also contains references to images
         List<Element> listAttachments = expr.evaluate(jdomDocument);
 
-        String id = "";
-        String name = "";
+        String id;
+        String name;
         for (Element attachment : listAttachments) {
             id = attachment.getAttributeValue("Id");
             name = attachment.getAttributeValue("Name");
@@ -256,7 +252,6 @@ public class UserStorieExtractor {
             // Download the attachment
             logger.debug("DOWNLOADING ATTACHMENT - US " + userStorieId + " - " + attachmentUrl + id);
             driver.get(attachmentUrl + id);
-            String source = driver.getPageSource();
 
             // Need to do a tempo in order to download the current file
             try {
