@@ -1,6 +1,7 @@
 package com.challer.tpextraction;
 
 import com.sun.istack.internal.NotNull;
+import org.joda.time.DateTime;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -27,6 +28,7 @@ public class Main {
 
         logger.info("TP EXTRACTION IS STARTING");
 
+        final DateTime startDateTime = new DateTime();
         Main main = new Main();
 
         logger.info("CHECKING CONFIGURATION FILE");
@@ -39,7 +41,7 @@ public class Main {
         // Execute process extraction of User Stories
         try {
             logger.info("STARTING US EXTRACTION");
-            main.processUserStoriesExtraction();
+            main.processUserStoriesExtraction(startDateTime.toString("YYYYMMDD"));
             logger.info("US EXTRACTION IS DONE");
         } catch (ExtractionException e) {
             logger.error(e.getMessage(), e);
@@ -87,9 +89,10 @@ public class Main {
     /**
      * Extract User Stories from Target Process
      *
+     * @param startDateTime Datetime - Date/Hour of starting extraction
      * @throws ExtractionException
      */
-    private void processUserStoriesExtraction() throws ExtractionException {
+    private void processUserStoriesExtraction(String startDateTime) throws ExtractionException {
 
         // Configure and call the browser FireFox
         final FirefoxProfile firefoxProfile = new FirefoxProfile();
@@ -98,7 +101,7 @@ public class Main {
         firefoxProfile.setPreference("browser.download.manager.showWhenStarting", false);
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving");
+        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving") + "\\" + startDateTime;
         firefoxProfile.setPreference("browser.download.dir", outputPathUserStorieSaving + "\\attachments");
 
         // Get different typemine allowed for the downloading
@@ -114,7 +117,7 @@ public class Main {
 
         // Call the browser Firefox
         final WebDriver driver = new FirefoxDriver(firefoxProfile);
-        final UserStorieExtractor extractor = new UserStorieExtractor(driver);
+        final UserStorieExtractor extractor = new UserStorieExtractor(driver, startDateTime);
 
         // Set the timeout at 30 seconds
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);

@@ -36,10 +36,16 @@ public class UserStorieExtractor {
     private final WebDriver driver;
 
     /**
+     * Date/Hour of starting extraction
+     */
+    private final String startDateTime;
+
+    /**
      * @param driver WebDriver - Webdriver used to connect to Target Process
      */
-    public UserStorieExtractor(WebDriver driver) {
+    public UserStorieExtractor(WebDriver driver, String startDateTime) {
         this.driver = driver;
+        this.startDateTime = startDateTime;
     }
 
     /**
@@ -92,7 +98,7 @@ public class UserStorieExtractor {
         final String userStorieUrl = ConfigurationProperties.getProperty("tp.userstorie.url");
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving");
+        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving") + "\\" + startDateTime;
 
         // Connection to Target Process URL allowing to download content of an User Storie
         logger.debug("GETTING US CONTENT - " + userStorieUrl + "/" + userStorieId);
@@ -143,7 +149,7 @@ public class UserStorieExtractor {
         final String nonSecureBaseUrl = ConfigurationProperties.getProperty("tp.nonsecurebaseurl");
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving");
+        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving") + "\\" + startDateTime;
 
         // Parse the XML flow describing the content of the User Storie
         SAXBuilder sb = new SAXBuilder();
@@ -226,7 +232,7 @@ public class UserStorieExtractor {
         final String timeoutdownload = ConfigurationProperties.getProperty("tp.attachment.timeoutdownload");
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving");
+        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving") + "\\" + startDateTime;
 
         // Connection to Target Process URL to download attachments list of an User Storie
         driver.get(userStorieUrl + "/" + userStorieId + "/" + userStorieUrlAttachmentParams);
