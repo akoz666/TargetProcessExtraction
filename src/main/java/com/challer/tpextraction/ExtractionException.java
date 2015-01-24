@@ -11,4 +11,8 @@ public class ExtractionException extends Exception {
         super(message, cause);
     }
 
+    public ExtractionException(final String message) {
+        super(message);
+    }
+
 }
