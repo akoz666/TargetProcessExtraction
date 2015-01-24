@@ -5,7 +5,7 @@ TargetProcessExtraction is coded in Java 8 !
 To launch TargetProcessExtraction, you need to  
 1. Install Firefox. Indeed TargetProcessExtraction is using Selenium API.   
 2. Desactivate PDF reader plugin in Firefox. The how to it explained here [Remove PDF plugin in FireFox)(https://support.mozilla.org/fr/questions/950086)  
-3. Adapt the config.properties file with your specifities :  
+3. Adapt the config.properties file with your specificities :  
 
 * tp.username => username to connect to Target Process => johndoe@gmail.com  
 * tp.password => password to connect to Target Process => doedoe  
