@@ -174,6 +174,9 @@ public class WebsiteGenerator {
             description = description.replaceAll("(id&#58;\\D*)(\\d*)", "<a href=\"us-$2.html\">$2</a>");
 
             // URL images
+
+            description = description.replaceAll("(img.*src=\")/", "$1");
+
             final Pattern p = Pattern.compile("(img.*src=)(\"/)(.*\")");
             final Matcher m = p.matcher(description);
             final StringBuffer s = new StringBuffer();
