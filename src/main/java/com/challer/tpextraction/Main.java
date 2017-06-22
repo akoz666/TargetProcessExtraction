@@ -20,7 +20,7 @@ public class Main {
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String... args) {
-
+        //System.setProperty("webdriver.gecko.driver", "/home/dali/geckodriver");
         logger.info("TP EXTRACTION IS STARTING");
 
         final DateTime startDateTime = new DateTime();
@@ -36,13 +36,15 @@ public class Main {
         try {
             // Execute process extraction of User Stories
             logger.info("STARTING US EXTRACTION");
-            UserStoryExtractor extractor = UserStoryExtractor.getInstance(startDateTime.toString("YYYYMMDD-HHmm"));
+//            UserStoryExtractor extractor = UserStoryExtractor.getInstance(startDateTime.toString("YYYYMMDD-HHmm"));
+            UserStoryExtractor extractor = UserStoryExtractor.getInstance("");
             extractor.processUserStoriesExtraction();
             logger.info("US EXTRACTION IS DONE");
 
             // Generate a static html website as parsing xml information extracted from Target Process
             logger.info("STARTING WEBSITE GENERATION");
-            WebsiteGenerator generator = WebsiteGenerator.getInstance(startDateTime.toString("YYYYMMDD-HHmm"));
+//            WebsiteGenerator generator = WebsiteGenerator.getInstance(startDateTime.toString("YYYYMMDD-HHmm"));
+            WebsiteGenerator generator = WebsiteGenerator.getInstance("");
             generator.generateHTML();
             logger.info("WEBSITE GENERATION IS DONE");
 

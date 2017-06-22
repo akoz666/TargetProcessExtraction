@@ -18,6 +18,10 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -63,16 +67,16 @@ public class UserStoryExtractor {
         firefoxProfile.setPreference("browser.download.manager.showWhenStarting", false);
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
+        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
         // Create directories
         final File usDirectory = new File(outputPathUserStoriesSaving);
         usDirectory.mkdir();
-        final File attachmentsDirectory = new File(outputPathUserStoriesSaving + "\\attachments");
+        final File attachmentsDirectory = new File(outputPathUserStoriesSaving + "/attachments");
         attachmentsDirectory.mkdir();
-        final File imagesDirectory = new File(outputPathUserStoriesSaving + "\\images");
+        final File imagesDirectory = new File(outputPathUserStoriesSaving + "/images");
         imagesDirectory.mkdir();
 
-        firefoxProfile.setPreference("browser.download.dir", outputPathUserStoriesSaving + "\\attachments");
+        firefoxProfile.setPreference("browser.download.dir", outputPathUserStoriesSaving + "/attachments");
 
         // Get different typemine allowed for the downloading
         final String typemime = ConfigurationProperties.getProperty("tp.attachment.typemime");
@@ -155,7 +159,7 @@ public class UserStoryExtractor {
         final String userStoryUrl = ConfigurationProperties.getProperty("tp.userstory.url");
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
+        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
 
         // Connection to Target Process URL allowing to download content of an User Storie
         logger.debug("GETTING US CONTENT - " + userStoryUrl + "/" + userStoryId);
@@ -176,10 +180,10 @@ public class UserStoryExtractor {
         // Now it has to save the content of the User Story
         FileWriter writer = null;
         try {
-            writer = new FileWriter(outputPathUserStoriesSaving + "\\us-" + userStoryId + ".xml");
+            writer = new FileWriter(outputPathUserStoriesSaving + "/us-" + userStoryId + ".xml");
             writer.write(userStoryContent);
         } catch (IOException ex) {
-            throw new ExtractionException("Failed to write the file " + outputPathUserStoriesSaving + "\\us-" + userStoryId + ".xml", ex);
+            throw new ExtractionException("Failed to write the file " + outputPathUserStoriesSaving + "/us-" + userStoryId + ".xml", ex);
         } finally {
             if (writer != null) {
                 writer.close();
@@ -206,7 +210,7 @@ public class UserStoryExtractor {
         final String nonSecureBaseUrl = ConfigurationProperties.getProperty("tp.nonsecurebaseurl");
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
+        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
 
         // Parse the XML flow describing the content of the User Story
         SAXBuilder sb = new SAXBuilder();
@@ -232,7 +236,7 @@ public class UserStoryExtractor {
         List<Element> listImages = expr.evaluate(jdomDocument);
         for (Element image : listImages) {
             String imageSrc = image.getAttributeValue("src");
-            if (imageSrc != null && !imageSrc.equals("#") && imageSrc.contains("images/")) {
+            if (imageSrc != null && !imageSrc.equals("#") && imageSrc.contains("Attachment.aspx?AttachmentID") && !imageSrc.contains("file://") && !imageSrc.contains("webkit-fake-url://")) {
 
                 // Get the image via Selenium API
                 if (imageSrc.contains("~")) {
@@ -246,22 +250,24 @@ public class UserStoryExtractor {
 
                 logger.debug("DOWNLOADING IMAGE - US " + userStoryId + " - " + baseUrl + imageSrc);
                 driver.get(baseUrl + imageSrc);
+                Boolean isPresent = driver.findElements(By.xpath("/html/body/img")).size() > 0;
+                if(isPresent) {
+                    WebElement imgElement = driver.findElement(By.xpath("/html/body/img"));
 
-                WebElement imgElement = driver.findElement(By.xpath("/html/body/img"));
+                    // Make a screenshot
+                    File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                    BufferedImage fullImg = ImageIO.read(screenshot);
 
-                // Make a screenshot
-                File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                BufferedImage fullImg = ImageIO.read(screenshot);
+                    // Crop the image
+                    Point point = imgElement.getLocation();
+                    int eleWidth = imgElement.getSize().getWidth();
+                    int eleHeight = imgElement.getSize().getHeight();
+                    BufferedImage eleScreenshot = fullImg.getSubimage(point.getX(), point.getY(), eleWidth, eleHeight);
+                    ImageIO.write(eleScreenshot, "png", screenshot);
 
-                // Crop the image
-                Point point = imgElement.getLocation();
-                int eleWidth = imgElement.getSize().getWidth();
-                int eleHeight = imgElement.getSize().getHeight();
-                BufferedImage eleScreenshot = fullImg.getSubimage(point.getX(), point.getY(), eleWidth, eleHeight);
-                ImageIO.write(eleScreenshot, "png", screenshot);
-
-                // Save the image in the appropriate directory
-                FileUtils.copyFile(screenshot, new File(outputPathUserStoriesSaving + "\\" + imageSrc));
+                    // Save the image in the appropriate directory
+                    FileUtils.copyFile(screenshot, new File(outputPathUserStoriesSaving + "/" + imageSrc));
+                }
             }
         }
     }
@@ -289,7 +295,7 @@ public class UserStoryExtractor {
         final String timeoutdownload = ConfigurationProperties.getProperty("tp.attachment.timeoutdownload");
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriesaving") + "\\" + startDateTime;
+        final String outputPathUserStorieSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
 
         // Connection to Target Process URL to download attachments list of an User Storie
         driver.get(userStoryUrl + "/" + userStoryId + "/" + userStoryUrlAttachmentParams);
@@ -323,16 +329,15 @@ public class UserStoryExtractor {
                 throw new ExtractionException("Thread sleep failed", e);
             }
 
-            // Rename the document with adding the US ID in prefix
-            File file = new File(outputPathUserStorieSaving + "\\attachments\\" + name);
 
-            // File (or directory) with new name
-            File file2 = new File(outputPathUserStorieSaving + "\\attachments\\" + userStoryId + "-" + name);
-            if (file2.exists())
-                throw new java.io.IOException("File " + outputPathUserStorieSaving + "\\" + userStoryId + "-" + name + " already exists");
+            Path movefrom = FileSystems.getDefault().getPath(outputPathUserStorieSaving + "/attachments/" + name);
+            Path target = FileSystems.getDefault().getPath(outputPathUserStorieSaving + "/attachments/" + userStoryId + "/" + name);
+            Path target_dir = FileSystems.getDefault().getPath(outputPathUserStorieSaving + "/attachments/" + userStoryId);
+            if(Files.notExists(target_dir)) {
+                Files.createDirectories(target_dir);
+            }
 
-            // Rename file (or directory)
-            file.renameTo(file2);
+            Files.move(movefrom, target, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
@@ -372,7 +377,8 @@ public class UserStoryExtractor {
         driver.findElement(By.id("UserName")).sendKeys(username);
         driver.findElement(By.id("Password")).clear();
         driver.findElement(By.id("Password")).sendKeys(password);
-        driver.findElement(By.id("btnLogin")).click();
+//        driver.findElement(By.id("btnLogin")).click();
+        driver.findElement(By.id("loginButton_btnLogin")).click();
 
         // Need to do a tempo in order to load the global context of Target Process
         try {

@@ -12,13 +12,41 @@
 
     <properties>
         <selenium.version>2.44.0</selenium.version>
+        <!--<selenium.version>3.4.0</selenium.version>-->
         <jdom2.version>2.0.5</jdom2.version>
         <jaxen.version>1.1.6</jaxen.version>
         <logback.version>1.1.2</logback.version>
         <jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
         <jodatime.version>2.6</jodatime.version>
         <velocity.version>1.7</velocity.version>
+
+
+
+        <!--<selenium.version>3.4.0</selenium.version>-->
+        <!--<jdom2.version>2.0.6</jdom2.version>-->
+        <!--<jaxen.version>1.1.6</jaxen.version>-->
+        <!--<logback.version>1.2.3</logback.version>-->
+        <!--<jcl-over-slf4j.version>1.7.25</jcl-over-slf4j.version>-->
+        <!--<jodatime.version>2.9.9</jodatime.version>-->
+        <!--<velocity.version>1.7</velocity.version>-->
+
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
 
     <dependencies>
         <dependency>
@@ -69,6 +97,16 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>javax.sql</groupId>
+            <artifactId>jdbc-stdext</artifactId>
+            <version>2.0</version>
+            <scope>system</scope>
+            <!--<systemPath>${java.home}/lib/rt.jar</systemPath>-->
+            <systemPath>/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/rt.jar</systemPath>
+        </dependency>
+
+
     </dependencies>
 
     <dependencyManagement>
@@ -86,5 +124,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
 
 </project>

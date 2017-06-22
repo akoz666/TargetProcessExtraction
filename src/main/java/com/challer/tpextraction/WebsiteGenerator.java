@@ -88,7 +88,7 @@ public class WebsiteGenerator {
     public void generateHTML() throws ExtractionException, IOException {
 
         // Get the directory where User Stories information are stored
-        final String userStoriesPath = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
+        final String userStoriesPath = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
 
         final File[] userStoriesFiles = listUserStoriesFiles(userStoriesPath);
 
@@ -136,8 +136,8 @@ public class WebsiteGenerator {
         final File bootstrap = new File(getClass().getClassLoader().getResource("generator/bootstrap").getFile());
         final File css = new File(getClass().getClassLoader().getResource("generator/css").getFile());
 
-        FileUtils.copyDirectory(bootstrap, new File(userStoriesPath + "\\bootstrap"));
-        FileUtils.copyDirectory(css, new File(userStoriesPath + "\\css"));
+        FileUtils.copyDirectory(bootstrap, new File(userStoriesPath + "/bootstrap"));
+        FileUtils.copyDirectory(css, new File(userStoriesPath + "/css"));
     }
 
     /**
@@ -213,14 +213,14 @@ public class WebsiteGenerator {
 
         // Search if attachments are existing
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
-        final File directoryToScan = new File(outputPathUserStoriesSaving + "\\" + "attachments");
-        final File[] files = directoryToScan.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().startsWith(us.getId());
-            }
-        });
-        us.setAttachments(files);
+        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
+        final File directoryToScan = new File(outputPathUserStoriesSaving + "/" + "attachments" + "/" + us.getId());
+//        final File[] files = directoryToScan.listFiles(new FilenameFilter() {
+//            public boolean accept(File dir, String name) {
+//                return name.toLowerCase().startsWith(us.getId());
+//            }
+//        });
+        us.setAttachments(directoryToScan.listFiles());
 
         return us;
     }
@@ -325,7 +325,7 @@ public class WebsiteGenerator {
     private void generateHtmlFromUserStory(final @NotNull UserStory userStory, final @NotNull List<UserStory> userStoriesList) throws ExtractionException, IOException {
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
+        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
 
         Template t = velocityEngine.getTemplate("userstory.vm");
         VelocityContext context = new VelocityContext();
@@ -337,10 +337,10 @@ public class WebsiteGenerator {
         // Now it has to save the content of the User Story
         FileWriter writer = null;
         try {
-            writer = new FileWriter(outputPathUserStoriesSaving + "\\us-" + userStory.getId() + ".html");
+            writer = new FileWriter(outputPathUserStoriesSaving + "/us-" + userStory.getId() + ".html");
             writer.write(stringWriter.toString());
         } catch (IOException ex) {
-            throw new ExtractionException("Failed to write the file " + outputPathUserStoriesSaving + "\\us-" + userStory.getId() + ".html", ex);
+            throw new ExtractionException("Failed to write the file " + outputPathUserStoriesSaving + "/us-" + userStory.getId() + ".html", ex);
         } finally {
             if (writer != null) {
                 writer.close();
@@ -359,9 +359,9 @@ public class WebsiteGenerator {
     private void generateHtmlListingPage(final @NotNull Map<String, List<UserStory>> featureUserStoriesMap, final @NotNull List<UserStory> userStoriesList) throws ExtractionException, IOException {
 
         // Get the directory where User Stories information have to be stored
-        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "\\" + startDateTime;
+        final String outputPathUserStoriesSaving = ConfigurationProperties.getProperty("outputpathuserstoriessaving") + "/" + startDateTime;
 
-        logger.debug("START GENERATE HTML HOMEPAGE " + outputPathUserStoriesSaving + "\\index.html");
+        logger.debug("START GENERATE HTML HOMEPAGE " + outputPathUserStoriesSaving + "/index.html");
 
         Template t = velocityEngine.getTemplate("uslisting.vm");
         VelocityContext context = new VelocityContext();
@@ -373,16 +373,16 @@ public class WebsiteGenerator {
         // Now it has to save the content of the User Story
         FileWriter writer = null;
         try {
-            writer = new FileWriter(outputPathUserStoriesSaving + "\\index.html");
+            writer = new FileWriter(outputPathUserStoriesSaving + "/index.html");
             writer.write(stringWriter.toString());
         } catch (IOException ex) {
-            throw new ExtractionException("Failed to write the file " + outputPathUserStoriesSaving + "\\index.html", ex);
+            throw new ExtractionException("Failed to write the file " + outputPathUserStoriesSaving + "/index.html", ex);
         } finally {
             if (writer != null) {
                 writer.close();
             }
         }
-        logger.debug("END GENERATE HTML HOMEPAGE " + outputPathUserStoriesSaving + "\\index.html");
+        logger.debug("END GENERATE HTML HOMEPAGE " + outputPathUserStoriesSaving + "/index.html");
     }
 
     /**

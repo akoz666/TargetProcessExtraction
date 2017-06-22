@@ -1,6 +1,7 @@
 package com.challer.tpextraction;
 
 import com.sun.istack.internal.NotNull;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -11,6 +12,7 @@ import java.util.Properties;
  * @author Cyril Haller - cyril.haller@gmail.com
  */
 public class ConfigurationProperties {
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(ConfigurationProperties.class);
 
     /**
      * Name of configuration file
@@ -51,7 +53,7 @@ public class ConfigurationProperties {
                 try {
                     propertiesResource.load(is);
                 } catch (IOException e) {
-                    //logger.error(e);
+                    logger.error("Error : ",e);
                 }
             }
         }
